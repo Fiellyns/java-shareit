@@ -34,7 +34,6 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User findById(Long userId) {
-        log.info("Найден пользователь с id: {}", userId);
         return userMap.get(userId);
     }
 

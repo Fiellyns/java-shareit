@@ -2,10 +2,12 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserDtoCreate;
+import ru.practicum.shareit.user.dto.UserDtoUpdate;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -21,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
+    public UserDto create(@Validated({UserDtoCreate.class}) @RequestBody UserDto userDto) {
         log.info("Поступил POST-запрос в /users");
         return userService.create(userDto);
     }
@@ -39,10 +41,11 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@RequestBody UserDto userDto,
+    public UserDto update(@Validated({UserDtoUpdate.class}) @RequestBody UserDto userDto,
                           @PathVariable("userId") Long userId) {
         log.info("Поступил Patch-запрос в /users/{}", userId);
-        return userService.updateById(userDto, userId);
+        userDto.setId(userId);
+        return userService.updateById(userDto);
     }
 
     @DeleteMapping("/{userId}")

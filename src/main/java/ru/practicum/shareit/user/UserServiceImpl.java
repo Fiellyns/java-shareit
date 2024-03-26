@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Collection;
@@ -24,41 +25,44 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
-        userDao.emailIsNotUnique(user, user.getId());
-        return userMapper.toUserDto(userDao.create(user));
+        return userMapper.toDto(userDao.create(userMapper.toModel(userDto)));
     }
 
     @Override
     public UserDto findById(Long userId) {
-        userDao.existsUserById(userId);
-        return userMapper.toUserDto(userDao.findById(userId));
+        existsUserById(userId);
+        return userMapper.toDto(userDao.findById(userId));
     }
 
     @Override
     public Collection<UserDto> findAll() {
         return userDao.findAll()
                 .stream()
-                .map(userMapper::toUserDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto updateById(UserDto userDto, Long userId) {
-        User userFromMap = userMapper.toUser(findById(userId));
-        User userFromDto = userMapper.toUser(userDto);
-
-        userDao.emailIsNotUnique(userFromDto, userId);
+    public UserDto updateById(UserDto userDto) {
+        User userFromMap = userMapper.toModel(findById(userDto.getId()));
+        User userFromDto = userMapper.toModel(userDto);
 
         userFromMap.setName(Objects.requireNonNullElse(userFromDto.getName(), userFromMap.getName()));
         userFromMap.setEmail(Objects.requireNonNullElse(userFromDto.getEmail(), userFromMap.getEmail()));
 
-        return userMapper.toUserDto(userDao.update(userFromMap, userId));
+        return userMapper.toDto(userDao.update(userFromMap));
     }
 
     @Override
     public void delete(Long userId) {
-        userDao.existsUserById(userId);
+        existsUserById(userId);
         userDao.delete(userId);
+    }
+
+    @Override
+    public void existsUserById(Long userId) {
+        if (!userDao.existsUserById(userId)) {
+            throw new NotFoundException("Пользователь с id: " + userId + " не найден");
+        }
     }
 }

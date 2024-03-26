@@ -32,20 +32,12 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(ItemNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleItemNotFound(ItemNotFoundException e) {
+    public ErrorResponse handleItemNotFound(NotFoundException e) {
         log.error(e.getMessage());
-        return new ErrorResponse("Предмет c " + e.getMessage() + " не найден");
+        return new ErrorResponse(e.getMessage());
     }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFound(UserNotFoundException e) {
-        log.error(e.getMessage());
-        return new ErrorResponse("Пользователь с " + e.getMessage() + " не найден");
-    }
-
 
 
     @ExceptionHandler(Throwable.class)

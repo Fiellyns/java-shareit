@@ -9,9 +9,9 @@ public interface ItemDao {
 
     Collection<Item> findAllByText(String text);
 
-    Collection<Item> getItemsByOwner(Long userId);
+    Collection<Item> getItemsByOwner(long userId);
 
-    Item update(Item item, Long itemId);
+    Item update(Item item);
 
-    void existsItemById(Long itemId);
+    boolean existsItemById(Long itemId);
 }

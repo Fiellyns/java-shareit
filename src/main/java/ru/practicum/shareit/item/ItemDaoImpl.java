@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.ItemNotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +11,8 @@ import java.util.stream.Collectors;
 public class ItemDaoImpl implements ItemDao {
 
     private final Map<Long, Item> itemMap = new HashMap<>();
+
+    private final Map<Long, List<Item>> userItemsMap = new HashMap<>();
     private Long idNext = 1L;
 
     private Long getIdNext() {
@@ -22,6 +23,9 @@ public class ItemDaoImpl implements ItemDao {
     public Item create(Item item) {
         item.setId(getIdNext());
         itemMap.put(item.getId(), item);
+        List<Item> userItemsList = userItemsMap.getOrDefault(item.getOwnerId(), new ArrayList<>());
+        userItemsList.add(item);
+        userItemsMap.put(item.getOwnerId(), userItemsList);
         log.info("Добавлен новый предмет: {}", item);
         return item;
     }
@@ -32,11 +36,9 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
-    public Collection<Item> getItemsByOwner(Long userId) {
+    public Collection<Item> getItemsByOwner(long userId) {
         log.info("Возвращены все предметы пользователя с id: {}", userId);
-        return itemMap.values().stream()
-                .filter(item -> item.getOwnerId().equals(userId))
-                .collect(Collectors.toList());
+        return userItemsMap.getOrDefault(userId, Collections.emptyList());
     }
 
     @Override
@@ -54,19 +56,18 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
-    public Item update(Item item, Long itemId) {
-        item.setId(item.getId());
+    public Item update(Item item) {
+        List<Item> userItemsList = userItemsMap.getOrDefault(item.getOwnerId(), new ArrayList<>());
+        userItemsList.set(userItemsList.indexOf(itemMap.get(item.getId())), item);
+        userItemsMap.put(item.getOwnerId(), userItemsList);
         itemMap.put(item.getId(), item);
-        log.info("Предмет с id: {}, был обновлён.", itemId);
+        log.info("Предмет с id: {}, был обновлён.", item.getId());
         return item;
     }
 
     @Override
-    public void existsItemById(Long itemId) {
-        if (!itemMap.containsKey(itemId)) {
-            log.warn("Предмет с id: {} не найден", itemId);
-            throw new ItemNotFoundException("id: " + itemId);
-        }
+    public boolean existsItemById(Long itemId) {
+        return itemMap.containsKey(itemId);
     }
 
 }

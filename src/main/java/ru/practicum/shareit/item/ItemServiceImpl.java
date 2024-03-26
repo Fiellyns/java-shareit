@@ -3,9 +3,9 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.UserDao;
+import ru.practicum.shareit.user.UserService;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -17,31 +17,30 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemMapper itemMapper;
     private final ItemDao itemDao;
-    private final UserDao userDao;
+    private final UserService userService;
 
     @Autowired
-    public ItemServiceImpl(ItemMapper itemMapper, ItemDao itemDao, UserDao userDao) {
+    public ItemServiceImpl(ItemMapper itemMapper, ItemDao itemDao, UserService userService) {
         this.itemMapper = itemMapper;
         this.itemDao = itemDao;
-        this.userDao = userDao;
+        this.userService = userService;
     }
 
-
     @Override
-    public ItemDto create(ItemDto itemDto, Long userId) {
-        userDao.existsUserById(userId);
+    public ItemDto create(ItemDto itemDto, long userId) {
+        userService.existsUserById(userId);
         return itemMapper.toItemDto(itemDao.create(itemMapper.toItem(itemDto, userId)));
     }
 
     @Override
     public ItemDto findById(Long itemId) {
-        itemDao.existsItemById(itemId);
+        existsItemById(itemId);
         return itemMapper.toItemDto(itemDao.findById(itemId));
     }
 
     @Override
-    public Collection<ItemDto> getItemsByOwner(Long userId) {
-        userDao.existsUserById(userId);
+    public Collection<ItemDto> getItemsByOwner(long userId) {
+        userService.existsUserById(userId);
         return itemDao.getItemsByOwner(userId)
                 .stream()
                 .map(itemMapper::toItemDto)
@@ -58,23 +57,29 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        userDao.existsUserById(userId);
-        itemDao.existsItemById(itemId);
-        Item item = itemDao.findById(itemId);
+    public ItemDto update(long userId, ItemDto itemDto) {
+        userService.existsUserById(userId);
+        Item item = itemDao.findById(itemDto.getId());
         if (!item.getOwnerId().equals(userId)) {
             log.warn("Указан неверный userID: {}", userId);
-            throw new UserNotFoundException("id: " + userId);
+            throw new NotFoundException("Предмет с id: " + item.getId() + " не найден");
         }
 
-        Item itemFromMap = itemMapper.toItem(findById(itemId), userId);
+        Item itemFromMap = itemMapper.toItem(findById(item.getId()), userId);
         Item itemFromDto = itemMapper.toItem(itemDto, userId);
 
         itemFromMap.setName(Objects.requireNonNullElse(itemFromDto.getName(), itemFromMap.getName()));
         itemFromMap.setDescription(Objects.requireNonNullElse(itemFromDto.getDescription(), itemFromMap.getDescription()));
         itemFromMap.setAvailable(Objects.requireNonNullElse(itemFromDto.getAvailable(), itemFromMap.getAvailable()));
 
-        return itemMapper.toItemDto(itemDao.update(itemFromMap, itemId));
+        return itemMapper.toItemDto(itemDao.update(itemFromMap));
+    }
+
+    @Override
+    public void existsItemById(Long itemId) {
+        if (!itemDao.existsItemById(itemId)) {
+            throw new NotFoundException("Предмет с id: " + itemId + " не найден");
+        }
     }
 
 }

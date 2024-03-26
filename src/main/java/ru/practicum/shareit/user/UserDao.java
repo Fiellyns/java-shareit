@@ -9,11 +9,10 @@ public interface UserDao {
 
     User findById(Long id);
 
-    User update(User user, Long userId);
+    User update(User user);
 
     void delete(Long id);
 
-    void existsUserById(Long userId);
+    boolean existsUserById(Long userId);
 
-    void emailIsNotUnique(User user, Long userId);
 }

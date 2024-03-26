@@ -10,10 +10,9 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class UserDto {
     private Long id;
-    @NotBlank
+    @NotBlank(groups = {UserDtoCreate.class})
     private String name;
-    @Email(regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$",
-            message = "Неверный формат адреса электронной почты")
-    @NotBlank
+    @Email(groups = {UserDtoCreate.class, UserDtoUpdate.class}, message = "Неверный формат адреса электронной почты")
+    @NotBlank(groups = {UserDtoCreate.class})
     private String email;
 }

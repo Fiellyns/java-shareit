@@ -3,15 +3,16 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.EmailExistException;
-import ru.practicum.shareit.exception.UserNotFoundException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class UserDaoImpl implements UserDao {
     private final Map<Long, User> userMap = new HashMap<>();
+
+    private final Set<String> usersEmailSet = new HashSet<>();
+
     private Long idNext = 1L;
 
     private Long getIdNext() {
@@ -20,6 +21,9 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User create(User user) {
+        if (!usersEmailSet.add(user.getEmail())) {
+            throw new EmailExistException("Пользователь с таким E-mail= " + user.getEmail() + " уже существует!");
+        }
         user.setId(getIdNext());
         userMap.put(user.getId(), user);
         log.info("Добавлен новый пользователь: {}", user);
@@ -38,36 +42,29 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User update(User user, Long userId) {
-        user.setId(userId);
-        userMap.put(userId, user);
-        log.info("Пользователь с id: {} был обновлён", userId);
+    public User update(User user) {
+        User updatingUser = userMap.get(user.getId());
+        if (!user.getEmail().equalsIgnoreCase(updatingUser.getEmail())) {
+            if (!usersEmailSet.add(user.getEmail())) {
+                throw new EmailExistException("Пользователь с таким E-mail= " + user.getEmail() + " уже существует!");
+            }
+            usersEmailSet.remove(updatingUser.getEmail());
+        }
+        userMap.put(user.getId(), user);
+        log.info("Пользователь с id: {} был обновлён", user.getId());
         return user;
     }
 
     @Override
     public void delete(Long id) {
-        log.info("Пользователь с id: {} удалён", id);
+        usersEmailSet.remove(userMap.get(id).getEmail());
         userMap.remove(id);
+        log.info("Пользователь с id: {} удалён", id);
     }
 
     @Override
-    public void existsUserById(Long userId) {
-        if (!userMap.containsKey(userId)) {
-            log.warn("Пользователь с id: {} не найден", userId);
-            throw new UserNotFoundException("id: " + userId);
-        }
+    public boolean existsUserById(Long userId) {
+        return userMap.containsKey(userId);
     }
 
-    @Override
-    public void emailIsNotUnique(User user, Long userId) {
-        List<User> userWithSameEmail = findAll()
-                .stream()
-                .filter(u -> u.getEmail().equals(user.getEmail()))
-                .filter(u -> !Objects.equals(u.getId(), userId))
-                .collect(Collectors.toList());
-        if (!userWithSameEmail.isEmpty()) {
-            throw new EmailExistException("Пользователь с таким E-mail= " + user.getEmail() + " уже существует!");
-        }
-    }
 }

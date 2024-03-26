@@ -32,7 +32,8 @@ public class ItemController {
                           @RequestBody ItemDto itemDto,
                           @PathVariable("itemId") Long itemId) {
         log.info("Поступил Patch-запрос в /items/{}", itemId);
-        return itemService.update(userId, itemId, itemDto);
+        itemDto.setId(itemId);
+        return itemService.update(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")

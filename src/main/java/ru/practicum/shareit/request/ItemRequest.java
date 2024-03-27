@@ -12,14 +12,4 @@ public class ItemRequest {
     private String description;
     private Long requestorId;
     private LocalDateTime created;
-
-    @Override
-    public String toString() {
-        return "ItemRequest{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                ", requestorId=" + requestorId +
-                ", created=" + created +
-                '}';
-    }
 }

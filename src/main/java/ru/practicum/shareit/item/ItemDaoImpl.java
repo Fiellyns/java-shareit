@@ -1,12 +1,10 @@
 package ru.practicum.shareit.item;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 public class ItemDaoImpl implements ItemDao {
 
@@ -23,21 +21,19 @@ public class ItemDaoImpl implements ItemDao {
     public Item create(Item item) {
         item.setId(getIdNext());
         itemMap.put(item.getId(), item);
-        List<Item> userItemsList = userItemsMap.getOrDefault(item.getOwnerId(), new ArrayList<>());
+        List<Item> userItemsList = userItemsMap.getOrDefault(item.getOwner().getId(), new ArrayList<>());
         userItemsList.add(item);
-        userItemsMap.put(item.getOwnerId(), userItemsList);
-        log.info("Добавлен новый предмет: {}", item);
+        userItemsMap.put(item.getOwner().getId(), userItemsList);
         return item;
     }
 
     @Override
-    public Item findById(Long itemId) {
-        return itemMap.get(itemId);
+    public Optional<Item> findById(Long itemId) {
+        return Optional.ofNullable(itemMap.get(itemId));
     }
 
     @Override
     public Collection<Item> getItemsByOwner(long userId) {
-        log.info("Возвращены все предметы пользователя с id: {}", userId);
         return userItemsMap.getOrDefault(userId, Collections.emptyList());
     }
 
@@ -50,24 +46,17 @@ public class ItemDaoImpl implements ItemDao {
                     .filter(item -> item.getName().toLowerCase().contains(text) ||
                             item.getDescription().toLowerCase().contains(text))
                     .collect(Collectors.toList());
-            log.info("Возвращены все предметы по слову: {}.", text);
         }
         return searchItems;
     }
 
     @Override
     public Item update(Item item) {
-        List<Item> userItemsList = userItemsMap.getOrDefault(item.getOwnerId(), new ArrayList<>());
+        List<Item> userItemsList = userItemsMap.getOrDefault(item.getOwner().getId(), new ArrayList<>());
         userItemsList.set(userItemsList.indexOf(itemMap.get(item.getId())), item);
-        userItemsMap.put(item.getOwnerId(), userItemsList);
+        userItemsMap.put(item.getOwner().getId(), userItemsList);
         itemMap.put(item.getId(), item);
-        log.info("Предмет с id: {}, был обновлён.", item.getId());
         return item;
-    }
-
-    @Override
-    public boolean existsItemById(Long itemId) {
-        return itemMap.containsKey(itemId);
     }
 
 }

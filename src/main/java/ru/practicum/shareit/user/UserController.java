@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -22,35 +23,46 @@ public class UserController {
         this.userService = userService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public UserDto create(@Validated({UserDtoCreate.class}) @RequestBody UserDto userDto) {
         log.info("Поступил POST-запрос в /users");
-        return userService.create(userDto);
+        UserDto user = userService.create(userDto);
+        log.info("POST-запрос /users был обработан: {}", user);
+        return user;
     }
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable("userId") Long userId) {
         log.info("Поступил GET-запрос в /users/{}", userId);
-        return userService.findById(userId);
+        UserDto user = userService.findById(userId);
+        log.info("GET-запрос /users/{} был обработан: {}", userId, user);
+        return user;
     }
 
     @GetMapping
     public Collection<UserDto> getAll() {
         log.info("Поступил GET-запрос в /users");
-        return userService.findAll();
+        Collection<UserDto> userDtos = userService.findAll();
+        log.info("GET-запрос /users был обработан: {}", userDtos);
+        return userDtos;
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@Validated({UserDtoUpdate.class}) @RequestBody UserDto userDto,
                           @PathVariable("userId") Long userId) {
-        log.info("Поступил Patch-запрос в /users/{}", userId);
+        log.info("Поступил PATCH-запрос в /users/{}", userId);
         userDto.setId(userId);
-        return userService.updateById(userDto);
+        UserDto user = userService.updateById(userDto);
+        log.info("PATCH-запрос /users/{} был обработан: {}", userId, user);
+        return user;
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{userId}")
     public void delete(@PathVariable("userId") Long userId) {
         log.debug("Поступил DELETE-запрос в /users/{}/", userId);
         userService.delete(userId);
+        log.info("DELETE-запрос /users/{} был обработан", userId);
     }
 }

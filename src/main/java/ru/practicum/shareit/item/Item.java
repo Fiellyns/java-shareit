@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item;
 
 import lombok.*;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.user.User;
 
 @Getter
 @Setter
@@ -12,8 +14,8 @@ public class Item {
     private String name;
     private String description;
     private Boolean available;
-    private Long ownerId;
-    private Long requestId;
+    private User owner;
+    private ItemRequest request;
 
     @Override
     public String toString() {

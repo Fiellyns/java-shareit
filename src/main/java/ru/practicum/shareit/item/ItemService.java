@@ -14,6 +14,4 @@ public interface ItemService {
     Collection<ItemDto> getItemsByOwner(long userId);
 
     ItemDto update(long userId, ItemDto item);
-
-    void existsItemById(Long itemId);
 }

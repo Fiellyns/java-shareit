@@ -30,8 +30,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findById(Long userId) {
-        existsUserById(userId);
-        return userMapper.toDto(userDao.findById(userId));
+        return userMapper.toDto(userDao.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден")));
     }
 
     @Override
@@ -55,14 +55,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long userId) {
-        existsUserById(userId);
+        User user = userDao.findById(userId) // проверка на наличие
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
         userDao.delete(userId);
     }
 
-    @Override
-    public void existsUserById(Long userId) {
-        if (!userDao.existsUserById(userId)) {
-            throw new NotFoundException("Пользователь с id: " + userId + " не найден");
-        }
-    }
 }

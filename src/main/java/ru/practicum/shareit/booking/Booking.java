@@ -14,16 +14,4 @@ public class Booking {
     private Long itemId;
     private Long bookerId;
     private Status status;
-
-    @Override
-    public String toString() {
-        return "Booking{" +
-                "id=" + id +
-                ", start=" + start +
-                ", end=" + end +
-                ", itemId=" + itemId +
-                ", bookerId=" + bookerId +
-                ", status=" + status +
-                '}';
-    }
 }

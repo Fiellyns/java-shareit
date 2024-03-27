@@ -1,12 +1,10 @@
 package ru.practicum.shareit.user;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.EmailExistException;
 
 import java.util.*;
 
-@Slf4j
 @Component
 public class UserDaoImpl implements UserDao {
     private final Map<Long, User> userMap = new HashMap<>();
@@ -26,19 +24,17 @@ public class UserDaoImpl implements UserDao {
         }
         user.setId(getIdNext());
         userMap.put(user.getId(), user);
-        log.info("Добавлен новый пользователь: {}", user);
         return user;
     }
 
     @Override
     public Collection<User> findAll() {
-        log.info("Возвращены все пользователи");
         return userMap.values();
     }
 
     @Override
-    public User findById(Long userId) {
-        return userMap.get(userId);
+    public Optional<User> findById(Long userId) {
+        return Optional.ofNullable(userMap.get(userId));
     }
 
     @Override
@@ -51,7 +47,6 @@ public class UserDaoImpl implements UserDao {
             usersEmailSet.remove(updatingUser.getEmail());
         }
         userMap.put(user.getId(), user);
-        log.info("Пользователь с id: {} был обновлён", user.getId());
         return user;
     }
 
@@ -59,12 +54,5 @@ public class UserDaoImpl implements UserDao {
     public void delete(Long id) {
         usersEmailSet.remove(userMap.get(id).getEmail());
         userMap.remove(id);
-        log.info("Пользователь с id: {} удалён", id);
     }
-
-    @Override
-    public boolean existsUserById(Long userId) {
-        return userMap.containsKey(userId);
-    }
-
 }

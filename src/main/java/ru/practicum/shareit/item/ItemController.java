@@ -9,7 +9,6 @@ import ru.practicum.shareit.forDto.Create;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 

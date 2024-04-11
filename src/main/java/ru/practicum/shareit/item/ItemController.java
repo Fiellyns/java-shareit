@@ -3,7 +3,10 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.forDto.Create;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
@@ -24,7 +27,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @Valid @RequestBody ItemDto itemDto) {
+                          @Validated({Create.class}) @RequestBody ItemDto itemDto) {
         log.info("Поступил POST-запрос в /items");
         ItemDto item = itemService.create(itemDto, userId);
         log.info("POST-запрос /items был обработан: {}", item);
@@ -43,9 +46,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable("itemId") Long itemId) {
+    public ItemDto getById(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable("itemId") Long itemId) {
         log.info("Поступил GET-запрос в /items/{}", itemId);
-        ItemDto item = itemService.findById(itemId);
+        ItemDto item = itemService.getByItemIdAndUserId(userId, itemId);
         log.info("GET-запрос /items/{} был обработан: {}", itemId, item);
         return item;
     }
@@ -64,6 +67,16 @@ public class ItemController {
         Collection<ItemDto> itemDtos = itemService.findAllByText(text);
         log.info("GET-запрос /items/search/{} был обработан: {}", text, itemDtos);
         return itemDtos;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto create(@RequestHeader("X-Sharer-User-Id") long userId,
+                             @PathVariable Long itemId,
+                             @Validated({Create.class}) @RequestBody CommentDto commentDto) {
+        log.info("Поступил POST-запрос в /items/{}/comment", itemId);
+        CommentDto createdComment = itemService.create(commentDto, userId, itemId);
+        log.info("POST-запрос /items/{}/comment был обработан: {}", itemId, createdComment);
+        return createdComment;
     }
 
 }

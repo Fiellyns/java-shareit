@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.forDto.Create;
+import ru.practicum.shareit.forDto.Update;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoCreate;
-import ru.practicum.shareit.user.dto.UserDtoUpdate;
 
 import java.util.Collection;
 
@@ -25,7 +25,7 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public UserDto create(@Validated({UserDtoCreate.class}) @RequestBody UserDto userDto) {
+    public UserDto create(@Validated({Create.class}) @RequestBody UserDto userDto) {
         log.info("Поступил POST-запрос в /users");
         UserDto user = userService.create(userDto);
         log.info("POST-запрос /users был обработан: {}", user);
@@ -49,7 +49,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@Validated({UserDtoUpdate.class}) @RequestBody UserDto userDto,
+    public UserDto update(@Validated({Update.class}) @RequestBody UserDto userDto,
                           @PathVariable("userId") Long userId) {
         log.info("Поступил PATCH-запрос в /users/{}", userId);
         userDto.setId(userId);

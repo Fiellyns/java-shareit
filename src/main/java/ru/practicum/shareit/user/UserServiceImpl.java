@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserDto userDto) {
-        return userMapper.toDto(userDao.create(userMapper.toModel(userDto)));
+        return userMapper.toDto(userDao.save(userMapper.toModel(userDto)));
     }
 
     @Override
@@ -50,14 +50,12 @@ public class UserServiceImpl implements UserService {
         userFromMap.setName(Objects.requireNonNullElse(userFromDto.getName(), userFromMap.getName()));
         userFromMap.setEmail(Objects.requireNonNullElse(userFromDto.getEmail(), userFromMap.getEmail()));
 
-        return userMapper.toDto(userDao.update(userFromMap));
+        return userMapper.toDto(userDao.save(userFromMap));
     }
 
     @Override
     public void delete(Long userId) {
-        User user = userDao.findById(userId) // проверка на наличие
-                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
-        userDao.delete(userId);
+        userDao.deleteById(userId);
     }
 
 }

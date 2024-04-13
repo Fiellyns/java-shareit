@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class BookingOutputDto {
+public class BookingDto {
     Long id;
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     LocalDateTime start;

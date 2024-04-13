@@ -4,15 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingDao;
 import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookerInfoDto;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDao;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -23,35 +23,35 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
-    private final ItemDao itemDao;
-    private final UserDao userDao;
-    private final BookingDao bookingDao;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     private final CommentDao commentDao;
 
     @Autowired
-    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemDao itemDao, UserDao userDao, BookingDao bookingDao, CommentDao commentDao) {
+    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentDao commentDao) {
         this.itemMapper = itemMapper;
         this.commentMapper = commentMapper;
-        this.itemDao = itemDao;
-        this.userDao = userDao;
-        this.bookingDao = bookingDao;
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
         this.commentDao = commentDao;
     }
 
     @Override
     public ItemDto create(ItemDto itemDto, long userId) {
-        User user = userDao.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
-        return itemMapper.toDto(itemDao.save(itemMapper.toModel(itemDto, user)));
+        return itemMapper.toDto(itemRepository.save(itemMapper.toModel(itemDto, user)));
     }
 
     @Override
     public CommentDto create(CommentDto commentDto, long userId, Long itemId) {
-        User user = userDao.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
-        Item item = itemDao.findById(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id: " + itemId + " не найден"));
-        Collection<Booking> userBookings = bookingDao
+        Collection<Booking> userBookings = bookingRepository
                 .findAllByBookerIdAndItemIdAndStatusIsAndEndTimeBefore(
                         userId, itemId, Status.APPROVED, LocalDateTime.now());
         if (userBookings.isEmpty()) {
@@ -73,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getByItemIdAndUserId(long userId, Long itemId) {
-        Item item = itemDao.findById(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id: " + itemId + " не найден"));
         if (item.getOwner().getId().equals(userId)) {
             return itemMapper.toDto(item, getLastBooking(item.getId()), getNextBooking(item.getId()), getAllCommentsByItemId(itemId));
@@ -83,11 +83,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getItemsByOwner(long userId) {
-        List<Item> items = itemDao.findAllByOwnerIdOrderByIdAsc(userId);
+        List<Item> items = itemRepository.findAllByOwnerId(userId, Sort.by("id").ascending());
         List<Long> itemsIds = items.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
-        List<Booking> bookings = bookingDao.findAllByItemIdIn(itemsIds);
+        List<Booking> bookings = bookingRepository.findAllByItemIdIn(itemsIds);
         if (bookings.isEmpty()) {
             return items.stream()
                     .map(itemMapper::toDto)
@@ -100,8 +100,8 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.groupingBy(comment -> comment.getItem().getId(), Collectors.toList()));
         return items.stream()
                 .map(item -> {
-                    BookerInfoDto lastBooking = getLastBooking(itemBookings.getOrDefault(item.getId(), new ArrayList<>()));
-                    BookerInfoDto nextBooking = getNextBooking(itemBookings.getOrDefault(item.getId(), new ArrayList<>()));
+                    BookerInfoDto lastBooking = getLastBooking(itemBookings.getOrDefault(item.getId(), Collections.emptyList()));
+                    BookerInfoDto nextBooking = getNextBooking(itemBookings.getOrDefault(item.getId(), Collections.emptyList()));
                     List<CommentDto> commentsItem = itemComments.containsKey(item.getId()) ?
                             itemComments.get(item.getId())
                                     .stream()
@@ -120,7 +120,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        return itemDao.search(text)
+        return itemRepository.search(text)
                 .stream()
                 .map(item -> itemMapper.toDto(item, getLastBooking(item.getId()), getNextBooking(item.getId()),
                         getAllCommentsByItemId(item.getId())))
@@ -129,9 +129,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(long userId, ItemDto itemDto) {
-        User user = userDao.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
-        Item item = itemDao.findById(itemDto.getId())
+        Item item = itemRepository.findById(itemDto.getId())
                 .orElseThrow(() -> new NotFoundException("Предмет с id: " + itemDto.getId() + " не найден"));
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Предмет с id: " + item.getId() + " не найден");
@@ -143,19 +143,19 @@ public class ItemServiceImpl implements ItemService {
         item.setDescription(Objects.requireNonNullElse(itemFromDto.getDescription(), item.getDescription()));
         item.setAvailable(Objects.requireNonNullElse(itemFromDto.getAvailable(), item.getAvailable()));
 
-        return itemMapper.toDto(itemDao.save(item), getLastBooking(item.getId()), getNextBooking(item.getId()),
+        return itemMapper.toDto(itemRepository.save(item), getLastBooking(item.getId()), getNextBooking(item.getId()),
                 getAllCommentsByItemId(item.getId()));
     }
 
     private BookerInfoDto getLastBooking(long itemId) {
-        return bookingDao.findFirstByItemIdAndStatusEqualsAndStartTimeIsBefore(itemId,
+        return bookingRepository.findFirstByItemIdAndStatusEqualsAndStartTimeIsBefore(itemId,
                         Status.APPROVED, LocalDateTime.now(), Sort.by("endTime").descending())
                 .map(BookingMapper::toBookerInfoDto)
                 .orElse(null);
     }
 
     private BookerInfoDto getNextBooking(long itemId) {
-        return bookingDao.findFirstByItemIdAndStatusEqualsAndStartTimeIsAfter(itemId,
+        return bookingRepository.findFirstByItemIdAndStatusEqualsAndStartTimeIsAfter(itemId,
                         Status.APPROVED, LocalDateTime.now(), Sort.by("startTime").ascending())
                 .map(BookingMapper::toBookerInfoDto)
                 .orElse(null);

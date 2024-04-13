@@ -1,10 +1,10 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.BookingInputDto;
-import ru.practicum.shareit.booking.dto.BookingOutputDto;
-import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.booking.dto.BookerInfoDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -18,19 +18,19 @@ public class BookingMapper {
         return new BookerInfoDto(booking.getId(), booking.getBooker().getId(), booking.getStartTime(), booking.getEndTime());
     }
 
-    public BookingOutputDto toDto(Booking booking) {
+    public BookingDto toDto(Booking booking) {
         UserDto userDto = new UserDto(booking.getBooker().getId(),
                 booking.getBooker().getName(), booking.getBooker().getEmail());
         ItemDto itemDto = new ItemDto(booking.getItem().getId(), booking.getItem().getName(),
                 booking.getItem().getDescription(), booking.getItem().getAvailable(), null, null, new ArrayList<>());
-        return new BookingOutputDto(booking.getId(), booking.getStartTime(), booking.getEndTime(), booking.getStatus(), userDto, itemDto);
+        return new BookingDto(booking.getId(), booking.getStartTime(), booking.getEndTime(), booking.getStatus(), userDto, itemDto);
     }
 
-    public Booking toModel(BookingInputDto bookingInputDto, Status status,
+    public Booking toModel(BookingCreateDto bookingCreateDto, Status status,
                            Item item, User user) {
         return new Booking().toBuilder()
-                .startTime(bookingInputDto.getStartTime())
-                .endTime(bookingInputDto.getEndTime())
+                .startTime(bookingCreateDto.getStartTime())
+                .endTime(bookingCreateDto.getEndTime())
                 .status(status)
                 .booker(user)
                 .item(item)

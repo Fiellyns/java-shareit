@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.validation;
 
-import ru.practicum.shareit.booking.dto.BookingInputDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -9,10 +9,10 @@ import javax.validation.constraintvalidation.ValidationTarget;
 import java.time.LocalDateTime;
 
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
-public class StartBeforeEndValidation implements ConstraintValidator<StartBeforeEnd, BookingInputDto> {
+public class StartBeforeEndValidation implements ConstraintValidator<StartBeforeEnd, BookingCreateDto> {
 
     @Override
-    public boolean isValid(BookingInputDto booking, ConstraintValidatorContext context) {
+    public boolean isValid(BookingCreateDto booking, ConstraintValidatorContext context) {
         if (booking.getStartTime() == null || booking.getEndTime() == null || booking.getItemId() == null) {
             return false;
         }

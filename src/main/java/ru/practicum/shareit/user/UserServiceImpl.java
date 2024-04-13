@@ -14,29 +14,29 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserDao userDao;
+    private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, UserMapper userMapper) {
-        this.userDao = userDao;
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
 
     @Override
     public UserDto create(UserDto userDto) {
-        return userMapper.toDto(userDao.save(userMapper.toModel(userDto)));
+        return userMapper.toDto(userRepository.save(userMapper.toModel(userDto)));
     }
 
     @Override
     public UserDto findById(Long userId) {
-        return userMapper.toDto(userDao.findById(userId)
+        return userMapper.toDto(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден")));
     }
 
     @Override
     public Collection<UserDto> findAll() {
-        return userDao.findAll()
+        return userRepository.findAll()
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
@@ -50,12 +50,12 @@ public class UserServiceImpl implements UserService {
         userFromMap.setName(Objects.requireNonNullElse(userFromDto.getName(), userFromMap.getName()));
         userFromMap.setEmail(Objects.requireNonNullElse(userFromDto.getEmail(), userFromMap.getEmail()));
 
-        return userMapper.toDto(userDao.save(userFromMap));
+        return userMapper.toDto(userRepository.save(userFromMap));
     }
 
     @Override
     public void delete(Long userId) {
-        userDao.deleteById(userId);
+        userRepository.deleteById(userId);
     }
 
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @StartBeforeEnd
-public class BookingInputDto {
+public class BookingCreateDto {
     @NotNull(groups = {Create.class})
     Long itemId;
     @NotNull(groups = {Create.class})

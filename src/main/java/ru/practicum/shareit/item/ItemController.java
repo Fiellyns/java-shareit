@@ -47,15 +47,15 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDto getById(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable("itemId") Long itemId) {
         log.info("Поступил GET-запрос в /items/{}", itemId);
-        ItemDto item = itemService.getByItemIdAndUserId(userId, itemId);
+        ItemDto item = itemService.getByIdAndUserId(userId, itemId);
         log.info("GET-запрос /items/{} был обработан: {}", itemId, item);
         return item;
     }
 
     @GetMapping
-    public Collection<ItemDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemDto> getByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Поступил GET-запрос в /items/ на получение вещей владельца с ID: {}", userId);
-        Collection<ItemDto> itemDtos = itemService.getItemsByOwner(userId);
+        Collection<ItemDto> itemDtos = itemService.getByOwner(userId);
         log.info("GET-запрос /items/ на получение вещей владельца с ID: {} был обработан: {}", userId, itemDtos);
         return itemDtos;
     }

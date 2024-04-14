@@ -11,11 +11,11 @@ public interface ItemService {
 
     CommentDto create(CommentDto commentDto, long userId, Long itemId);
 
-    List<CommentDto> getAllCommentsByItemId(Long itemId);
+    List<CommentDto> getAllComments(Long itemId);
 
-    ItemDto getByItemIdAndUserId(long userId, Long itemId);
+    ItemDto getByIdAndUserId(long userId, Long itemId);
 
-    Collection<ItemDto> getItemsByOwner(long userId);
+    List<ItemDto> getByOwner(long userId);
 
     Collection<ItemDto> findAllByText(String text);
 

@@ -68,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto getBooking(Long bookingId, long userId) {
+    public BookingDto getById(Long bookingId, long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id: " + userId + " не найден");
         }
@@ -139,7 +139,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             case FUTURE:
                 requestedBooking = bookingRepository
-                        .findFAllByItemOwnerIdAndStartTimeAfter(userId, now, sort);
+                        .findAllByItemOwnerIdAndStartTimeAfter(userId, now, sort);
                 break;
             case PAST:
                 requestedBooking = bookingRepository

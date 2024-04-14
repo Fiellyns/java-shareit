@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class BookerInfoDto {
+public class BookingInfoDto {
     Long id;
     Long bookerId;
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")

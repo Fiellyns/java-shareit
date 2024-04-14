@@ -1,9 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.BookerInfoDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
@@ -14,8 +14,8 @@ import java.util.ArrayList;
 @Component
 public class BookingMapper {
 
-    public static BookerInfoDto toBookerInfoDto(Booking booking) {
-        return new BookerInfoDto(booking.getId(), booking.getBooker().getId(), booking.getStartTime(), booking.getEndTime());
+    public static BookingInfoDto toBookingInfoDto(Booking booking) {
+        return new BookingInfoDto(booking.getId(), booking.getBooker().getId(), booking.getStartTime(), booking.getEndTime());
     }
 
     public BookingDto toDto(Booking booking) {

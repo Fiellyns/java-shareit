@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserDto get(@PathVariable("userId") Long userId) {
+    public UserDto getById(@PathVariable("userId") Long userId) {
         log.info("Поступил GET-запрос в /users/{}", userId);
         UserDto user = userService.findById(userId);
         log.info("GET-запрос /users/{} был обработан: {}", userId, user);

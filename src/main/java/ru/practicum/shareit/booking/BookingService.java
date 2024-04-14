@@ -10,7 +10,7 @@ public interface BookingService {
 
     BookingDto update(Long bookingId, long userId, Boolean approved);
 
-    BookingDto getBooking(Long bookingId, long userId);
+    BookingDto getById(Long bookingId, long userId);
 
     Collection<BookingDto> getAllByOwnerQuery(long userId, BookingState state);
 

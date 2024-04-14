@@ -48,7 +48,7 @@ public class BookingController {
     public BookingDto getById(@RequestHeader("X-Sharer-User-Id") long userId,
                               @PathVariable Long bookingId) {
         log.info("Поступил GET-запрос в /bookings/{}", bookingId);
-        BookingDto booking = bookingService.getBooking(bookingId, userId);
+        BookingDto booking = bookingService.getById(bookingId, userId);
         log.info("GET-запрос /bookings/{} был обработан: {}", bookingId, booking);
         return booking;
     }

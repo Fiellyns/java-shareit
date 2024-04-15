@@ -1,20 +1,48 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.booking.dto.BookingInfoDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class ItemMapper {
 
-    public ItemDto toItemDto(Item item) {
+    public ItemDto toDto(Item item) {
         return new ItemDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable());
+                item.getAvailable(),
+                null,
+                null,
+                new ArrayList<>());
     }
 
-    public Item toItem(ItemDto itemDto, User owner) {
+    public ItemDto toDto(Item item, List<CommentDto> commentDto) {
+        return new ItemDto(item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                null,
+                null,
+                commentDto);
+    }
+
+    public ItemDto toDto(Item item, BookingInfoDto lastBooking, BookingInfoDto nextBooking, List<CommentDto> commentDto) {
+        return new ItemDto(item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                lastBooking,
+                nextBooking,
+                commentDto);
+    }
+
+    public Item toModel(ItemDto itemDto, User owner) {
         return new Item().toBuilder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())

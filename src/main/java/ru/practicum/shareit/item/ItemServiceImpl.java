@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
@@ -11,6 +12,8 @@ import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -26,15 +29,17 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final CommentDao commentDao;
 
     @Autowired
-    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentDao commentDao) {
+    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, ItemRequestRepository itemRequestRepository, CommentDao commentDao) {
         this.itemMapper = itemMapper;
         this.commentMapper = commentMapper;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
+        this.itemRequestRepository = itemRequestRepository;
         this.commentDao = commentDao;
     }
 
@@ -42,7 +47,9 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto create(ItemDto itemDto, long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
-        return itemMapper.toDto(itemRepository.save(itemMapper.toModel(itemDto, user)));
+        ItemRequest request = itemDto.getRequestId() != null ?
+                itemRequestRepository.findById(itemDto.getRequestId()).orElse(null) : null;
+        return itemMapper.toDto(itemRepository.save(itemMapper.toModel(itemDto, user, request)));
     }
 
     @Override
@@ -82,8 +89,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getByOwner(long userId) {
-        List<Item> items = itemRepository.findAllByOwnerId(userId, Sort.by("id").ascending());
+    public List<ItemDto> getByOwner(long userId, Pageable pageable) {
+        List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
         List<Long> itemsIds = items.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
@@ -116,11 +123,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> findAllByText(String text) {
+    public Collection<ItemDto> findAllByText(String text, Pageable pageable) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        return itemRepository.search(text)
+        return itemRepository.search(text, pageable)
                 .stream()
                 .map(item -> itemMapper.toDto(item, getLastBooking(item.getId()), getNextBooking(item.getId()),
                         getAllComments(item.getId())))

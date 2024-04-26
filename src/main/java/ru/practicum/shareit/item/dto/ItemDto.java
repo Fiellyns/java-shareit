@@ -21,7 +21,8 @@ public class ItemDto {
     private String description;
     @NotNull(groups = {Create.class})
     private Boolean available;
-    BookingInfoDto lastBooking;
-    BookingInfoDto nextBooking;
-    List<CommentDto> comments;
+    private BookingInfoDto lastBooking;
+    private BookingInfoDto nextBooking;
+    private Long requestId;
+    private List<CommentDto> comments;
 }

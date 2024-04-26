@@ -2,6 +2,9 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +12,7 @@ import ru.practicum.shareit.forDto.Create;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import javax.validation.constraints.Min;
 import java.util.Collection;
 
 
@@ -53,17 +57,23 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDto> getByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemDto> getByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                          @Min(0) @RequestParam(value = "from", defaultValue = "0") int offset,
+                                          @Min(1) @RequestParam(value = "size", defaultValue = "10") int limit) {
         log.info("Поступил GET-запрос в /items/ на получение вещей владельца с ID: {}", userId);
-        Collection<ItemDto> itemDtos = itemService.getByOwner(userId);
+        Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.ASC, "id"));
+        Collection<ItemDto> itemDtos = itemService.getByOwner(userId, pageable);
         log.info("GET-запрос /items/ на получение вещей владельца с ID: {} был обработан: {}", userId, itemDtos);
         return itemDtos;
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> getByText(@RequestParam(name = "text") String text) {
+    public Collection<ItemDto> getByText(@RequestParam(name = "text") String text,
+                                         @Min(0) @RequestParam(value = "from", defaultValue = "0") int offset,
+                                         @Min(1) @RequestParam(value = "size", defaultValue = "10") int limit) {
         log.info("Поступил GET-запрос в /items/search/{}", text);
-        Collection<ItemDto> itemDtos = itemService.findAllByText(text);
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Collection<ItemDto> itemDtos = itemService.findAllByText(text, pageable);
         log.info("GET-запрос /items/search/{} был обработан: {}", text, itemDtos);
         return itemDtos;
     }

@@ -9,7 +9,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

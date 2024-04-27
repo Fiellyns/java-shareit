@@ -18,7 +18,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBookerId(long userId, Pageable pageable);
 
     List<Booking> findAllByBookerIdAndStartTimeBeforeAndEndTimeAfter(long userId, LocalDateTime now,
-                                                                           LocalDateTime localDateTime, Pageable pageable);
+                                                                     LocalDateTime localDateTime, Pageable pageable);
 
     List<Booking> findAllByBookerIdAndStartTimeAfter(long userId, LocalDateTime now, Pageable pageable);
 
@@ -29,7 +29,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByItemOwnerId(long userId, Pageable pageable);
 
     List<Booking> findAllByItemOwnerIdAndStartTimeBeforeAndEndTimeAfter(long userId, LocalDateTime start,
-                                                                              LocalDateTime end, Pageable pageable);
+                                                                        LocalDateTime end, Pageable pageable);
 
     List<Booking> findAllByItemOwnerIdAndStartTimeAfter(long userId, LocalDateTime now, Pageable pageable);
 

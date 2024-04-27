@@ -30,11 +30,4 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REQUEST_ID")
     private ItemRequest request;
-
-    @Override
-    public String toString() {
-        return "Item{" +
-                "id=" + id +
-                '}';
-    }
 }

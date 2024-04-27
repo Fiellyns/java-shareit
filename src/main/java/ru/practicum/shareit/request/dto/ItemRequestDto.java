@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.shareit.forDto.Create;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class ItemRequestDto {
     private Long id;
     @NotBlank(groups = {Create.class})

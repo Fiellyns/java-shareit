@@ -18,6 +18,7 @@ import java.util.Collection;
 
 @Slf4j
 @RestController
+@Validated
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;

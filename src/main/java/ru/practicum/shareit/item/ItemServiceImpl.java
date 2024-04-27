@@ -30,17 +30,17 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ItemRequestRepository itemRequestRepository;
-    private final CommentDao commentDao;
+    private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, ItemRequestRepository itemRequestRepository, CommentDao commentDao) {
+    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, ItemRequestRepository itemRequestRepository, CommentRepository commentRepository) {
         this.itemMapper = itemMapper;
         this.commentMapper = commentMapper;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.itemRequestRepository = itemRequestRepository;
-        this.commentDao = commentDao;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -66,12 +66,12 @@ public class ItemServiceImpl implements ItemService {
         }
         commentDto.setCreated(LocalDateTime.now());
         Comment comment = commentMapper.toModel(commentDto, user, item);
-        return commentMapper.toDto(commentDao.save(comment));
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     @Override
     public List<CommentDto> getAllComments(Long itemId) {
-        List<Comment> comments = commentDao.findAllByItemId(itemId, Sort.by("created"));
+        List<Comment> comments = commentRepository.findAllByItemId(itemId, Sort.by("created"));
         return comments
                 .stream()
                 .map(commentMapper::toDto)
@@ -90,6 +90,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getByOwner(long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
         List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
         List<Long> itemsIds = items.stream()
                 .map(Item::getId)
@@ -100,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
                     .map(itemMapper::toDto)
                     .collect(Collectors.toList());
         }
-        List<Comment> comments = commentDao.findAllByItemIdIn(itemsIds);
+        List<Comment> comments = commentRepository.findAllByItemIdIn(itemsIds);
         Map<Long, List<Booking>> itemBookings = bookings.stream()
                 .collect(Collectors.groupingBy(booking -> booking.getItem().getId(), Collectors.toList()));
         Map<Long, List<Comment>> itemComments = comments.stream()

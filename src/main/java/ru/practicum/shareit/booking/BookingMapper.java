@@ -22,7 +22,10 @@ public class BookingMapper {
         UserDto userDto = new UserDto(booking.getBooker().getId(),
                 booking.getBooker().getName(), booking.getBooker().getEmail());
         ItemDto itemDto = new ItemDto(booking.getItem().getId(), booking.getItem().getName(),
-                booking.getItem().getDescription(), booking.getItem().getAvailable(), null, null, new ArrayList<>());
+                booking.getItem().getDescription(), booking.getItem().getAvailable(),
+                null, null,
+                booking.getItem().getRequest() != null ? booking.getItem().getRequest().getId() : null,
+                new ArrayList<>());
         return new BookingDto(booking.getId(), booking.getStartTime(), booking.getEndTime(), booking.getStatus(), userDto, itemDto);
     }
 

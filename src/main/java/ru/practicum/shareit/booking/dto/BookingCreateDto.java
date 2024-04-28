@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.shareit.booking.validation.StartBeforeEnd;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Data
 @StartBeforeEnd
+@Builder(toBuilder = true)
 public class BookingCreateDto {
     @NotNull(groups = {Create.class})
     Long itemId;

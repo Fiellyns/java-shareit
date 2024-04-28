@@ -20,11 +20,4 @@ public class User {
     private String name;
     @Column(name = "USER_EMAIL")
     private String email;
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                '}';
-    }
 }

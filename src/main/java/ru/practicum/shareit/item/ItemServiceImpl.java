@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
@@ -11,6 +12,8 @@ import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -19,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemMapper itemMapper;
@@ -26,23 +30,16 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
-    private final CommentDao commentDao;
-
-    @Autowired
-    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentDao commentDao) {
-        this.itemMapper = itemMapper;
-        this.commentMapper = commentMapper;
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.bookingRepository = bookingRepository;
-        this.commentDao = commentDao;
-    }
+    private final ItemRequestRepository itemRequestRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto create(ItemDto itemDto, long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
-        return itemMapper.toDto(itemRepository.save(itemMapper.toModel(itemDto, user)));
+        ItemRequest request = itemDto.getRequestId() != null ?
+                itemRequestRepository.findById(itemDto.getRequestId()).orElse(null) : null;
+        return itemMapper.toDto(itemRepository.save(itemMapper.toModel(itemDto, user, request)));
     }
 
     @Override
@@ -59,12 +56,12 @@ public class ItemServiceImpl implements ItemService {
         }
         commentDto.setCreated(LocalDateTime.now());
         Comment comment = commentMapper.toModel(commentDto, user, item);
-        return commentMapper.toDto(commentDao.save(comment));
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     @Override
     public List<CommentDto> getAllComments(Long itemId) {
-        List<Comment> comments = commentDao.findAllByItemId(itemId, Sort.by("created"));
+        List<Comment> comments = commentRepository.findAllByItemId(itemId, Sort.by("created"));
         return comments
                 .stream()
                 .map(commentMapper::toDto)
@@ -82,8 +79,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getByOwner(long userId) {
-        List<Item> items = itemRepository.findAllByOwnerId(userId, Sort.by("id").ascending());
+    public List<ItemDto> getByOwner(long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
+        List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
         List<Long> itemsIds = items.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
@@ -93,7 +92,7 @@ public class ItemServiceImpl implements ItemService {
                     .map(itemMapper::toDto)
                     .collect(Collectors.toList());
         }
-        List<Comment> comments = commentDao.findAllByItemIdIn(itemsIds);
+        List<Comment> comments = commentRepository.findAllByItemIdIn(itemsIds);
         Map<Long, List<Booking>> itemBookings = bookings.stream()
                 .collect(Collectors.groupingBy(booking -> booking.getItem().getId(), Collectors.toList()));
         Map<Long, List<Comment>> itemComments = comments.stream()
@@ -102,13 +101,10 @@ public class ItemServiceImpl implements ItemService {
                 .map(item -> {
                     BookingInfoDto lastBooking = getLastBooking(itemBookings.getOrDefault(item.getId(), Collections.emptyList()));
                     BookingInfoDto nextBooking = getNextBooking(itemBookings.getOrDefault(item.getId(), Collections.emptyList()));
-                    List<CommentDto> commentsItem = itemComments.containsKey(item.getId()) ?
-                            itemComments.get(item.getId())
-                                    .stream()
-                                    .map(commentMapper::toDto)
-                                    .collect(Collectors.toList())
-                            : new ArrayList<>();
-
+                    List<CommentDto> commentsItem = itemComments.getOrDefault(item.getId(), Collections.emptyList())
+                            .stream()
+                            .map(commentMapper::toDto)
+                            .collect(Collectors.toList());
                     return itemMapper.toDto(item, lastBooking,
                             nextBooking, commentsItem);
                 })
@@ -116,11 +112,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> findAllByText(String text) {
+    public Collection<ItemDto> findAllByText(String text, Pageable pageable) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        return itemRepository.search(text)
+        return itemRepository.search(text, pageable)
                 .stream()
                 .map(item -> itemMapper.toDto(item, getLastBooking(item.getId()), getNextBooking(item.getId()),
                         getAllComments(item.getId())))

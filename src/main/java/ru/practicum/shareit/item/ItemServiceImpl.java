@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemMapper itemMapper;
@@ -31,17 +32,6 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final ItemRequestRepository itemRequestRepository;
     private final CommentRepository commentRepository;
-
-    @Autowired
-    public ItemServiceImpl(ItemMapper itemMapper, CommentMapper commentMapper, ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, ItemRequestRepository itemRequestRepository, CommentRepository commentRepository) {
-        this.itemMapper = itemMapper;
-        this.commentMapper = commentMapper;
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.bookingRepository = bookingRepository;
-        this.itemRequestRepository = itemRequestRepository;
-        this.commentRepository = commentRepository;
-    }
 
     @Override
     public ItemDto create(ItemDto itemDto, long userId) {
@@ -111,13 +101,10 @@ public class ItemServiceImpl implements ItemService {
                 .map(item -> {
                     BookingInfoDto lastBooking = getLastBooking(itemBookings.getOrDefault(item.getId(), Collections.emptyList()));
                     BookingInfoDto nextBooking = getNextBooking(itemBookings.getOrDefault(item.getId(), Collections.emptyList()));
-                    List<CommentDto> commentsItem = itemComments.containsKey(item.getId()) ?
-                            itemComments.get(item.getId())
-                                    .stream()
-                                    .map(commentMapper::toDto)
-                                    .collect(Collectors.toList())
-                            : new ArrayList<>();
-
+                    List<CommentDto> commentsItem = itemComments.getOrDefault(item.getId(), Collections.emptyList())
+                            .stream()
+                            .map(commentMapper::toDto)
+                            .collect(Collectors.toList());
                     return itemMapper.toDto(item, lastBooking,
                             nextBooking, commentsItem);
                 })

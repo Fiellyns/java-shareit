@@ -1,6 +1,6 @@
 package ru.practicum.shareit.request;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -14,12 +14,13 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository;
@@ -28,15 +29,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final RequestMapper requestMapper;
     private final ItemMapper itemMapper;
 
-    @Autowired
-    public ItemRequestServiceImpl(ItemRequestRepository itemRequestRepository, ItemRepository itemRepository, UserRepository userRepository, RequestMapper requestMapper, ItemMapper itemMapper) {
-        this.itemRequestRepository = itemRequestRepository;
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.requestMapper = requestMapper;
-        this.itemMapper = itemMapper;
-    }
-
+    @Override
     public ItemRequestDto create(long userId, ItemRequestDto itemRequestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден"));
@@ -91,7 +84,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         return requests.stream()
                 .map(request -> {
-                    List<ItemDto> itemsDto = itemsReq.getOrDefault(request.getId(), new ArrayList<>())
+                    List<ItemDto> itemsDto = itemsReq.getOrDefault(request.getId(), Collections.emptyList())
                             .stream()
                             .map(itemMapper::toDto)
                             .collect(Collectors.toList());

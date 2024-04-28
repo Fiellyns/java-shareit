@@ -20,7 +20,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +66,7 @@ class ItemRequestServiceImplTest {
                 .id(1L)
                 .description("description")
                 .created(created)
-                .items(new ArrayList<>())
+                .items(Collections.emptyList())
                 .build();
         requestor = User.builder()
                 .id(1L)
@@ -121,7 +120,7 @@ class ItemRequestServiceImplTest {
     void getAll_whenItemsFound_thenReturnRequestWithItems() {
         requestDto.setItems(List.of(ItemDto.builder()
                 .id(1L)
-                .comments(new ArrayList<>())
+                .comments(Collections.emptyList())
                 .requestId(1L)
                 .build()));
         when(userRepository.findById(anyLong()))
@@ -161,7 +160,7 @@ class ItemRequestServiceImplTest {
                 .thenReturn(Optional.of(requestor));
         requestDto.setItems(List.of(ItemDto.builder()
                 .id(1L)
-                .comments(new ArrayList<>())
+                .comments(Collections.emptyList())
                 .requestId(1L)
                 .build()));
         when(requestRepository.findAllByRequestorIdNot(anyLong(), any(PageRequest.class)))

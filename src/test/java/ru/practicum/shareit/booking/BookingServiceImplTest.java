@@ -23,8 +23,8 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,7 +97,7 @@ class BookingServiceImplTest {
                         .id(1L).name("name")
                         .description("description")
                         .available(TRUE)
-                        .comments(new ArrayList<>())
+                        .comments(Collections.emptyList())
                         .build())
                 .build();
         booking = Booking.builder()

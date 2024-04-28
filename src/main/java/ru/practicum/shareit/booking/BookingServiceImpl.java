@@ -1,8 +1,7 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -19,20 +18,13 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingMapper bookingMapper;
-
-    @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, ItemRepository itemRepository, BookingMapper bookingMapper) {
-        this.bookingRepository = bookingRepository;
-        this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
-        this.bookingMapper = bookingMapper;
-    }
 
     @Override
     public BookingDto create(BookingCreateDto bookingDto, long userId) {
@@ -88,7 +80,6 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Пользователь с id: " + userId + " не найден");
         }
         Collection<Booking> requestedBooking;
-        Sort sort = Sort.by("startTime").descending();
         LocalDateTime now = LocalDateTime.now();
         switch (bookingState) {
             case ALL:

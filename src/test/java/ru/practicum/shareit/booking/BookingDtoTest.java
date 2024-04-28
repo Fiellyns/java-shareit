@@ -11,7 +11,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +39,7 @@ class BookingDtoTest {
                         .id(1L).name("name")
                         .description("description")
                         .available(TRUE)
-                        .comments(new ArrayList<>())
+                        .comments(Collections.emptyList())
                         .build())
                 .status(Status.WAITING)
                 .build();

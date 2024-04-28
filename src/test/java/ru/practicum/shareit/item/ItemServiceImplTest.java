@@ -84,19 +84,19 @@ class ItemServiceImplTest {
                 .description("description")
                 .available(TRUE)
                 .requestId(null)
-                .comments(new ArrayList<>())
+                .comments(Collections.emptyList())
                 .build();
         itemCreateDto = ItemDto.builder()
                 .name("name")
                 .description("description")
                 .available(TRUE)
                 .requestId(null)
-                .comments(new ArrayList<>())
+                .comments(Collections.emptyList())
                 .build();
         itemUpdateDto = ItemDto.builder()
                 .id(1L)
                 .name("newName")
-                .comments(new ArrayList<>())
+                .comments(Collections.emptyList())
                 .build();
         items = new ArrayList<>();
     }
